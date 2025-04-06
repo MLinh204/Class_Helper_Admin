@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { modifyHeart } from "@/utils/api";
@@ -8,19 +8,25 @@ import { isAxiosError } from "@/utils/errorUtils";
 
 
 interface ModifyHeartPageProps {
-    params: {
-        studentId: string;
-    };
+    params: Promise<{ studentId: string }>;
 }
 
 export default function ModifyHeartPage({ params }: ModifyHeartPageProps) {
-    const studentId = parseInt(params.studentId);
+    const [studentId, setStudentId] = useState<number | null>(null);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         heart: 0,
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const resolveParams = async () => {
+          const resolvedParams = await params;
+          setStudentId(parseInt(resolvedParams.studentId));
+        };
+        resolveParams();
+      }, [params]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -56,6 +62,9 @@ export default function ModifyHeartPage({ params }: ModifyHeartPageProps) {
         try {
             setLoading(true);
 
+            if (studentId === null) {
+                throw new Error("Student ID is null");
+            }
             await modifyHeart(studentId, { heart: Number(formData.heart) });
             router.push("/student");
         } catch (error: unknown) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { modifyLevel } from "@/utils/api";
@@ -8,19 +8,25 @@ import { isAxiosError } from "@/utils/errorUtils";
 
 
 interface ModifyLevelPageProps {
-    params: {
-        studentId: string;
-    };
+    params: Promise<{ studentId: string }>;
 }
 
 export default function ModifyLevelPage({ params }: ModifyLevelPageProps) {
-    const studentId = parseInt(params.studentId);
+    const [studentId, setStudentId] = useState<number | null>(null);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         level: 0,
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const resolveParams = async () => {
+            const resolvedParams = await params;
+            setStudentId(parseInt(resolvedParams.studentId));
+        };
+        resolveParams();
+    }, [params]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -56,6 +62,9 @@ export default function ModifyLevelPage({ params }: ModifyLevelPageProps) {
         try {
             setLoading(true);
 
+            if (studentId === null) {
+                throw new Error("Student ID is null");
+            }
             await modifyLevel(studentId, { level: Number(formData.level) });
             router.push("/student");
         } catch (error: unknown) {

@@ -8,16 +8,14 @@ import { isAxiosError } from "@/utils/errorUtils";
 
 
 interface EditUserPageProps {
-  params: {
-    userId: string;
-  };
+  params: Promise<{ userId: string }>;
 }
 type Role = {
   id: number;
   name: string;
 }
 export default function EditUserPage({ params }: EditUserPageProps) {
-  const userId = parseInt(params.userId);
+  const [userId, setUserId] = useState<number | null>(null);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -29,6 +27,14 @@ export default function EditUserPage({ params }: EditUserPageProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setUserId(parseInt(resolvedParams.userId));
+    };
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
     fetchUserData();
     fetchRoles();
   }, [userId]);
@@ -36,6 +42,9 @@ export default function EditUserPage({ params }: EditUserPageProps) {
   const fetchUserData = async () => {
     try {
       setLoading(true);
+      if (userId === null) {
+        throw new Error("User ID is null");
+      }
       const response = await getUserById(userId);
       const user = response.data;
       
@@ -100,6 +109,9 @@ export default function EditUserPage({ params }: EditUserPageProps) {
         username: formData.username
       };
       
+      if (userId === null) {
+        throw new Error("User ID is null");
+      }
       await updateUser(userId, userDataToSubmit);
       
       // Update role if needed

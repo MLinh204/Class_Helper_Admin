@@ -8,13 +8,11 @@ import { isAxiosError } from "@/utils/errorUtils";
 
 
 interface EditTeacherPageProps {
-  params: {
-    teacherId: string;
-  };
+  params: Promise<{ teacherId: string }>;
 }
 
 export default function EditTeacherPage({ params }: EditTeacherPageProps) {
-  const teacherId = parseInt(params.teacherId);
+  const [teacherId, setTeacherId] = useState<number | null>(null);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -22,6 +20,14 @@ export default function EditTeacherPage({ params }: EditTeacherPageProps) {
     scheduleDate: [] as string[],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setTeacherId(parseInt(resolvedParams.teacherId));
+    };
+    resolveParams();
+  }, [params]);
 
   useEffect(() => {
     fetchTeacherData();
@@ -30,6 +36,9 @@ export default function EditTeacherPage({ params }: EditTeacherPageProps) {
   const fetchTeacherData = async () => {
     try {
       setLoading(true);
+      if (teacherId === null) {
+        throw new Error("Teacher ID is null");
+      }
       const response = await getTeacherById(teacherId);
       const teacher = response.data;
 
@@ -101,6 +110,9 @@ export default function EditTeacherPage({ params }: EditTeacherPageProps) {
         ...formData,
       };
 
+      if(teacherId === null) {
+        throw new Error("Teacher ID is null");
+      }
       await updateTeacher(teacherId, dataToSubmit);
       router.push("/teacher");
     } catch (error: unknown) {

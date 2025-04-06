@@ -7,14 +7,12 @@ import { getRegistrationListById, updateRegistrationList } from "@/utils/api";
 import { isAxiosError } from "@/utils/errorUtils";
 
 
-interface EditRegistrationPageProps {
-  params: {
-    registrationListId: string;
-  };
+interface PageProps {
+  params: Promise<{ registrationListId: string }>;
 }
 
-export default function EditRegistrationPage({ params }: EditRegistrationPageProps) {
-  const registrationId = parseInt(params.registrationListId);
+export default function EditRegistrationPage({ params }: PageProps) {
+  const [registrationListId, setRegistrationListId] = useState<number | null>(null);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -24,13 +22,26 @@ export default function EditRegistrationPage({ params }: EditRegistrationPagePro
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    fetchRegistrationData();
-  }, [registrationId]);
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setRegistrationListId(parseInt(resolvedParams.registrationListId));
+    };
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (registrationListId !== null) {
+      fetchRegistrationData();
+    }
+  }, [registrationListId]);
 
   const fetchRegistrationData = async () => {
     try {
       setLoading(true);
-      const response = await getRegistrationListById(registrationId);
+      if (registrationListId === null) {
+        throw new Error("Registration List ID is null");
+      }
+      const response = await getRegistrationListById(registrationListId);
       const registration = response.data;
       
       setFormData({
@@ -78,8 +89,10 @@ export default function EditRegistrationPage({ params }: EditRegistrationPagePro
     
     try {
       setSubmitting(true);
-      
-      await updateRegistrationList(registrationId, formData);
+      if (registrationListId === null) {
+        throw new Error("Registration List ID is null");
+      }
+      await updateRegistrationList(registrationListId, formData);
       router.push("/registration");
     } catch (error: unknown) {
       console.error("Error update registration list:", error);

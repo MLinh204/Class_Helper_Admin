@@ -7,14 +7,12 @@ import { getStudentById, updateStudent } from "@/utils/api";
 import { isAxiosError } from "@/utils/errorUtils";
 
 
-interface EditStudentPageProps {
-  params: {
-    studentId: string;
-  };
+interface PageProps {
+  params: Promise<{ studentId: string }>;
 }
 
-export default function EditStudentPage({ params }: EditStudentPageProps) {
-  const studentId = parseInt(params.studentId);
+export default function EditStudentPage({ params }: PageProps) {
+  const [studentId, setStudentId] = useState<number | null>(null);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -31,12 +29,23 @@ export default function EditStudentPage({ params }: EditStudentPageProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setStudentId(parseInt(resolvedParams.studentId));
+    };
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
     fetchStudentData();
   }, [studentId]);
 
   const fetchStudentData = async () => {
     try {
       setLoading(true);
+      if (studentId === null) {
+        throw new Error("Student ID is null");
+      }
       const response = await getStudentById(studentId);
       const student = response.data;
       
@@ -121,6 +130,9 @@ export default function EditStudentPage({ params }: EditStudentPageProps) {
         heart: formData.heart ? Number(formData.heart) : undefined,
       };
       
+      if (studentId === null) {
+        throw new Error("Student ID is null");
+      }
       await updateStudent(studentId, dataToSubmit);
       router.push("/student-manage");
     } catch (error: unknown) {

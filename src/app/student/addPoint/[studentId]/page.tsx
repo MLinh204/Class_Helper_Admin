@@ -1,26 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { addPoint } from "@/utils/api";
 import { isAxiosError } from "@/utils/errorUtils";
 
 
-interface AddPointPageProps {
-    params: {
-        studentId: string;
-    };
+interface PageProps {
+    params: Promise<{ studentId: string }>;
 }
 
-export default function AddPointPage({ params }: AddPointPageProps) {
-    const studentId = parseInt(params.studentId);
+export default function AddPointPage({ params }: PageProps) {
+    const [studentId, setStudentId] = useState<number | null>(null);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         point: 0,
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const resolveParams = async () => {
+          const resolvedParams = await params;
+          setStudentId(parseInt(resolvedParams.studentId));
+        };
+        resolveParams();
+      }, [params]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -56,6 +62,9 @@ export default function AddPointPage({ params }: AddPointPageProps) {
         try {
             setLoading(true);
 
+            if (studentId === null) {
+                throw new Error("Student ID is null");
+            }
             await addPoint(studentId, { point: Number(formData.point) });
             router.push("/student");
         } catch (error: unknown) {
