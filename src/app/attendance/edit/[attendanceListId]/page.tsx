@@ -6,14 +6,14 @@ import SideBar from "@/components/SideBar";
 import { getAttendanceListById, updateAttendanceList } from "@/utils/api";
 import { isAxiosError } from "@/utils/errorUtils";
 
-
-type Props = {
-    params: {
-      attendanceListId: string;
-    };
+type PageProps = {
+  params: {
+    attendanceListId: string;
   };
-  
-export default function EditRegistrationPage({ params }: Props) {
+  searchParams: Record<string, string | string[] | undefined>;
+};
+
+export default function EditRegistrationPage({ params }: PageProps) {
     const attendanceListId = parseInt(params.attendanceListId);
     const router = useRouter();
     const [loading, setLoading] = useState(true);
@@ -88,13 +88,13 @@ export default function EditRegistrationPage({ params }: Props) {
             router.push("/attendance");
         } catch (error: unknown) {
             console.error("Error update registration list:", error);
-            if (isAxiosError(error) && error.response.data.message) {
+            if (isAxiosError(error) && error.response?.data?.message) {
               alert(`Error: ${error.response.data.message}`);
             } else {
               alert("Failed to update registration list. Please try again.");
             }
           } finally {
-            setLoading(false);
+            setSubmitting(false);  // Changed from setLoading to setSubmitting
           }
     };
 
@@ -138,16 +138,16 @@ export default function EditRegistrationPage({ params }: Props) {
                                     name="title"
                                     value={formData.title}
                                     onChange={handleChange}
-                                    className={`w-full border ${errors.name ? "border-red-500" : "border-gray-300"
+                                    className={`w-full border ${errors.title ? "border-red-500" : "border-gray-300"
                                         } rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                     placeholder="Enter title"
                                 />
-                                {errors.name && (
+                                {errors.title && (
                                     <p className="mt-1 text-red-500 text-sm">{errors.title}</p>
                                 )}
                             </div>
                             <div className="mb-4">
-                                <label htmlFor="Status" className="block text-gray-700 font-medium mb-2">
+                                <label htmlFor="status" className="block text-gray-700 font-medium mb-2">
                                     Status *
                                 </label>
                                 <select
