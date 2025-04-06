@@ -7,13 +7,13 @@ import { getAttendanceListById, updateAttendanceList } from "@/utils/api";
 import { isAxiosError } from "@/utils/errorUtils";
 
 
-interface EditAttendancePageProps {
+type Props = {
     params: {
-        attendanceListId: string;
+      attendanceListId: string;
     };
-}
-
-export default function EditRegistrationPage({ params }: EditAttendancePageProps) {
+  };
+  
+export default function EditRegistrationPage({ params }: Props) {
     const attendanceListId = parseInt(params.attendanceListId);
     const router = useRouter();
     const [loading, setLoading] = useState(true);
