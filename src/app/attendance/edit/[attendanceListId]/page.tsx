@@ -6,14 +6,11 @@ import SideBar from "@/components/SideBar";
 import { getAttendanceListById, updateAttendanceList } from "@/utils/api";
 import { isAxiosError } from "@/utils/errorUtils";
 
-type PageProps = {
-  params: {
-    attendanceListId: string;
-  };
-  searchParams: Record<string, string | string[] | undefined>;
-};
+interface AttendanceListPageParams {
+  attendanceListId: string;
+}
 
-export default function EditRegistrationPage({ params }: PageProps) {
+export default function EditRegistrationPage({ params }: { params: AttendanceListPageParams }) {
     const attendanceListId = parseInt(params.attendanceListId);
     const router = useRouter();
     const [loading, setLoading] = useState(true);
@@ -94,7 +91,7 @@ export default function EditRegistrationPage({ params }: PageProps) {
               alert("Failed to update registration list. Please try again.");
             }
           } finally {
-            setSubmitting(false);  // Changed from setLoading to setSubmitting
+            setSubmitting(false);
           }
     };
 
