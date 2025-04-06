@@ -12,7 +12,7 @@ interface MenuItemProps {
   active?: boolean;
 }
 
-const MenuItem = ({ href, label, onClick, active }: MenuItemProps) => (
+const MenuItem = ({ href, label, onClick}: MenuItemProps) => (
   <li className="py-3 px-4 hover:bg-blue-100 w-full transition duration-200">
     <Link
       href={href}

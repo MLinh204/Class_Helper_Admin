@@ -12,13 +12,16 @@ interface EditUserPageProps {
     userId: string;
   };
 }
-
+type Role = {
+  id: number;
+  name: string;
+}
 export default function EditUserPage({ params }: EditUserPageProps) {
   const userId = parseInt(params.userId);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [roles, setRoles] = useState<any[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [formData, setFormData] = useState({
     username: "",
     role_id: "",

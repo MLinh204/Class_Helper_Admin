@@ -3,6 +3,7 @@
 import React, { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { login } from '@/utils/api';
+import { isAxiosError } from '@/utils/errorUtils';
 
 const AuthForm: React.FC = () => {
   const router = useRouter();
@@ -36,11 +37,12 @@ const AuthForm: React.FC = () => {
         localStorage.setItem('user', JSON.stringify(res.data.user));
       }
       router.push('/');
-    } catch (err: unknown) {
-      if (err instanceof Error && 'response' in err) {
-        setError((err as any).response?.data?.message || 'An error occurred.');
+    } catch (error: unknown) {
+      console.error("Error:", error);
+      if (isAxiosError(error) && error.response.data.message) {
+        alert(`Error: ${error.response.data.message}`);
       } else {
-        setError('An unexpected error occurred.');
+        alert("An unexpected error occurred. Please try again.");
       }
     }
   };

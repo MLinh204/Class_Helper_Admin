@@ -7,10 +7,14 @@ import { createUser, getRoles } from "@/utils/api";
 import { isAxiosError } from "@/utils/errorUtils";
 
 
+type Role = {
+  id: number;
+  name: string;
+}
 export default function CreateUserPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [roles, setRoles] = useState<any[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -25,13 +29,13 @@ export default function CreateUserPage() {
         const response = await getRoles();
         setRoles(response.data);
         if (response.data.length > 0) {
-          setFormData(prev => ({...prev, role_id: response.data[0].id.toString()}));
+          setFormData(prev => ({ ...prev, role_id: response.data[0].id.toString() }));
         }
       } catch (error) {
         console.error("Error fetching roles:", error);
       }
     };
-    
+
     fetchRoles();
   }, []);
 
@@ -50,35 +54,35 @@ export default function CreateUserPage() {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.username.trim()) {
       newErrors.username = "Username is required";
     }
-    
+
     if (!formData.password.trim()) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validate()) {
       return;
     }
-    
+
     try {
       setLoading(true);
       const dataToSubmit = {
         ...formData,
         role_id: Number(formData.role_id),
       };
-      
+
       await createUser(dataToSubmit);
       router.push("/user");
     } catch (error: unknown) {
@@ -98,7 +102,7 @@ export default function CreateUserPage() {
       <SideBar />
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-6">
-          <button 
+          <button
             onClick={() => router.back()}
             className="mr-4 text-gray-600 hover:text-gray-900"
           >
@@ -122,9 +126,8 @@ export default function CreateUserPage() {
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  className={`w-full border ${
-                    errors.username ? "border-red-500" : "border-gray-300"
-                  } rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`w-full border ${errors.username ? "border-red-500" : "border-gray-300"
+                    } rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   placeholder="Enter username"
                 />
                 {errors.username && (
@@ -142,9 +145,8 @@ export default function CreateUserPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full border ${
-                    errors.password ? "border-red-500" : "border-gray-300"
-                  } rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className={`w-full border ${errors.password ? "border-red-500" : "border-gray-300"
+                    } rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                   placeholder="Enter password"
                 />
                 {errors.password && (
