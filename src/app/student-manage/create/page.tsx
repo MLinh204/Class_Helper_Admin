@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { createStudent } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 export default function CreateStudentPage() {
   const router = useRouter();
@@ -83,9 +85,9 @@ export default function CreateStudentPage() {
       
       await createStudent(dataToSubmit);
       router.push("/student-manage");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating student:", error);
-      if (error.response?.data?.message) {
+      if (isAxiosError(error) && error.response.data.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {
         alert("Failed to create student. Please try again.");

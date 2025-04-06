@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { modifyLevel } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 interface ModifyLevelPageProps {
     params: {
@@ -56,16 +58,16 @@ export default function ModifyLevelPage({ params }: ModifyLevelPageProps) {
 
             await modifyLevel(studentId, { level: Number(formData.level) });
             router.push("/student");
-        } catch (error: any) {
-            console.error("Error modifying level: ", error);
-            if (error.response?.data?.message) {
-                alert(`Error: ${error.response.data.message}`);
+        } catch (error: unknown) {
+            console.error("Error modify level:", error);
+            if (isAxiosError(error) && error.response.data.message) {
+              alert(`Error: ${error.response.data.message}`);
             } else {
-                alert("Failed to modify level. Please try again.");
+              alert("Failed to modify level. Please try again.");
             }
-        } finally {
+          } finally {
             setLoading(false);
-        }
+          }
     };
 
     return (

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { createTeacher } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 export default function CreateTeacherPage() {
   const router = useRouter();
@@ -83,9 +85,9 @@ export default function CreateTeacherPage() {
 
       await createTeacher(dataToSubmit);
       router.push("/teacher");
-    } catch (error: any) {
-      console.error("Error creating teacher:", error);
-      if (error.response?.data?.message) {
+    } catch (error: unknown) {
+      console.error("Error create teacher:", error);
+      if (isAxiosError(error) && error.response.data.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {
         alert("Failed to create teacher. Please try again.");

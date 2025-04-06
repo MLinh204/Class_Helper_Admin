@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { getStudentById, updateStudent } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 interface EditStudentPageProps {
   params: {
@@ -121,15 +123,15 @@ export default function EditStudentPage({ params }: EditStudentPageProps) {
       
       await updateStudent(studentId, dataToSubmit);
       router.push("/student-manage");
-    } catch (error: any) {
-      console.error("Error updating student:", error);
-      if (error.response?.data?.message) {
+    } catch (error: unknown) {
+      console.error("Error update student:", error);
+      if (isAxiosError(error) && error.response.data.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {
         alert("Failed to update student. Please try again.");
       }
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 

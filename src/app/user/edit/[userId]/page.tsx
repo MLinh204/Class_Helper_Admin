@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { getUserById, updateUser, getRoles, updateUserRole } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 interface EditUserPageProps {
   params: {
@@ -106,15 +108,15 @@ export default function EditUserPage({ params }: EditUserPageProps) {
       }
       
       router.push("/user");
-    } catch (error: any) {
-      console.error("Error updating user:", error);
-      if (error.response?.data?.message) {
+    } catch (error: unknown) {
+      console.error("Error update user:", error);
+      if (isAxiosError(error) && error.response.data.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {
         alert("Failed to update user. Please try again.");
       }
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 

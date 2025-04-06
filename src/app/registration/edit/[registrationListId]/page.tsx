@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { getRegistrationListById, updateRegistrationList } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 interface EditRegistrationPageProps {
   params: {
@@ -79,15 +81,15 @@ export default function EditRegistrationPage({ params }: EditRegistrationPagePro
       
       await updateRegistrationList(registrationId, formData);
       router.push("/registration");
-    } catch (error: any) {
-      console.error("Error updating registration:", error);
-      if (error.response?.data?.message) {
+    } catch (error: unknown) {
+      console.error("Error update registration list:", error);
+      if (isAxiosError(error) && error.response.data.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {
-        alert("Failed to update registration. Please try again.");
+        alert("Failed to update registration list. Please try again.");
       }
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 

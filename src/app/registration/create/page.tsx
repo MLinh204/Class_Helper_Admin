@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { addRegistrationList } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 export default function CreateRegistrationPage() {
   const router = useRouter();
@@ -49,12 +51,12 @@ export default function CreateRegistrationPage() {
       
       await addRegistrationList(formData);
       router.push("/registration");
-    } catch (error: any) {
-      console.error("Error creating registration:", error);
-      if (error.response?.data?.message) {
+    } catch (error: unknown) {
+      console.error("Error adding registration list:", error);
+      if (isAxiosError(error) && error.response.data.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {
-        alert("Failed to create registration. Please try again.");
+        alert("Failed to add registration list. Please try again.");
       }
     } finally {
       setLoading(false);

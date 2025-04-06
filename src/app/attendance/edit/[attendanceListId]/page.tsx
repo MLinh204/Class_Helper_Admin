@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { getAttendanceListById, updateAttendanceList } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 interface EditAttendancePageProps {
     params: {
@@ -84,16 +86,16 @@ export default function EditRegistrationPage({ params }: EditAttendancePageProps
 
             await updateAttendanceList(attendanceListId, formData);
             router.push("/attendance");
-        } catch (error: any) {
-            console.error("Error updating attendance list:", error);
-            if (error.response?.data?.message) {
-                alert(`Error: ${error.response.data.message}`);
+        } catch (error: unknown) {
+            console.error("Error update registration list:", error);
+            if (isAxiosError(error) && error.response.data.message) {
+              alert(`Error: ${error.response.data.message}`);
             } else {
-                alert("Failed to update attendance list. Please try again.");
+              alert("Failed to update registration list. Please try again.");
             }
-        } finally {
-            setSubmitting(false);
-        }
+          } finally {
+            setLoading(false);
+          }
     };
 
     if (loading) {

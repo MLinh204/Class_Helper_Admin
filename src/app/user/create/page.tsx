@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { createUser, getRoles } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 export default function CreateUserPage() {
   const router = useRouter();
@@ -79,9 +81,9 @@ export default function CreateUserPage() {
       
       await createUser(dataToSubmit);
       router.push("/user");
-    } catch (error: any) {
-      console.error("Error creating user:", error);
-      if (error.response?.data?.message) {
+    } catch (error: unknown) {
+      console.error("Error create user:", error);
+      if (isAxiosError(error) && error.response.data.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {
         alert("Failed to create user. Please try again.");

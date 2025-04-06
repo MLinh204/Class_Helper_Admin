@@ -2,7 +2,6 @@
 import React from 'react';
 import AnimatedCard from '@/components/AnimatedCard';
 import AuthForm from '@/components/AuthForm';
-import Link from 'next/link';
 
 const LoginPage = () => {
   return (

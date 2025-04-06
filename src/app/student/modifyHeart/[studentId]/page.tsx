@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { modifyHeart } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 interface ModifyHeartPageProps {
     params: {
@@ -56,16 +58,16 @@ export default function ModifyHeartPage({ params }: ModifyHeartPageProps) {
 
             await modifyHeart(studentId, { heart: Number(formData.heart) });
             router.push("/student");
-        } catch (error: any) {
-            console.error("Error adding heart: ", error);
-            if (error.response?.data?.message) {
-                alert(`Error: ${error.response.data.message}`);
+        } catch (error: unknown) {
+            console.error("Error modify heart:", error);
+            if (isAxiosError(error) && error.response.data.message) {
+              alert(`Error: ${error.response.data.message}`);
             } else {
-                alert("Failed to adding heart. Please try again.");
+              alert("Failed to modify heart. Please try again.");
             }
-        } finally {
+          } finally {
             setLoading(false);
-        }
+          }
     };
 
     return (

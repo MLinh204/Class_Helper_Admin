@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { createAttendanceList } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 export default function CreateRegistrationPage() {
   const router = useRouter();
@@ -49,9 +51,9 @@ export default function CreateRegistrationPage() {
       
       await createAttendanceList(formData);
       router.push("/attendance");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating attendance list:", error);
-      if (error.response?.data?.message) {
+      if (isAxiosError(error) && error.response.data.message) {
         alert(`Error: ${error.response.data.message}`);
       } else {
         alert("Failed to create attendance list. Please try again.");

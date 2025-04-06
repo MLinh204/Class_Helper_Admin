@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { addPoint } from "@/utils/api";
+import { isAxiosError } from "@/utils/errorUtils";
+
 
 interface AddPointPageProps {
     params: {
@@ -56,16 +58,16 @@ export default function AddPointPage({ params }: AddPointPageProps) {
 
             await addPoint(studentId, { point: Number(formData.point) });
             router.push("/student");
-        } catch (error: any) {
-            console.error("Error adding point: ", error);
-            if (error.response?.data?.message) {
-                alert(`Error: ${error.response.data.message}`);
+        } catch (error: unknown) {
+            console.error("Error adding point:", error);
+            if (isAxiosError(error) && error.response.data.message) {
+              alert(`Error: ${error.response.data.message}`);
             } else {
-                alert("Failed to adding point. Please try again.");
+              alert("Failed to add point. Please try again.");
             }
-        } finally {
+          } finally {
             setLoading(false);
-        }
+          }
     };
 
     return (
