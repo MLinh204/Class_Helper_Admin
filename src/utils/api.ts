@@ -84,7 +84,8 @@ export const createVocab = (listId: number, data: Record<string, unknown>) => ap
 export const getVocabByListId = (id: number) => api.get(`/vocab/list/${id}`);
 export const updateVocab = (id: number, data: Record<string, unknown>) => api.put(`/vocab/${id}`, data);
 export const deleteVocab = (id: number) => api.delete(`/vocab/${id}`);
-export const searchVocab = (listId: number, q: string) => api.get(`/vocab/list/${listId}/search?query=${q}`);
+export const searchVocabViaListId = (id: number, query: string) => api.get(`/vocab/list/${id}/search?query=${query}`);
+export const sortVocabViaListId = (id: number, column: string, order: string) => api.get(`/vocab/list/${id}/sort?column=${column}&order=${order}`);
 
 // Registration List endpoints
 export const getRegistrationListById = (id: number) => api.get(`/registrationList/${id}`);

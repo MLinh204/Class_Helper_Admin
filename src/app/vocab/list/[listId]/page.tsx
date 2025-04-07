@@ -1,41 +1,49 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SideBar from "@/components/SideBar";
-import { getAllVocabLists, deleteVocabList, sortVocabListsBy, searchVocabList } from "@/utils/api";
+import { getVocabByListId, searchVocabViaListId, sortVocabViaListId, deleteVocab } from "@/utils/api";
 
-interface VocabList {
+interface Vocab {
     id: number;
-    title: string;
-    description: string;
-    category: string;
-    word_count: number;
-    teacher_id: string;
+    list_id: number;
+    word: string;
+    translation: string;
+    definition: string;
+    part_of_speech: 'noun' | 'verb' | 'adjective' | 'adverb' | 'pronoun' | 'preposition' | 'phrase verb' | 'collocation';
+    example_sentence: string;
+    synonyms: string;
+    antonyms: string;
+    created_by: string;
     created_at: string;
 }
 
-export default function VocabListPage() {
+export default function Vocab({ params }: { params: Promise<{ listId: number }> }) {
     const router = useRouter();
-    const [vocabLists, setVocabLists] = useState<VocabList[]>([]);
+    const {listId} = use(params);
+    const [vocabs, setVocabs] = useState<Vocab[]>([]);
     const [loading, setLoading] = useState(true);
     const [showSearchBar, setShowSearchBar] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [sortColumn, setSortColumn] = useState("");
     const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("ASC");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [vocabListToDelete, setVocabListToDelete] = useState<number | null>(null);
+    const [vocabToDelete, setVocabToDelete] = useState<number | null>(null);
+
+
 
     useEffect(() => {
-        fetchVocabLists();
+        fetchVocabs();
     }, []);
 
-    const fetchVocabLists = async () => {
+    const fetchVocabs = async () => {
         try {
             setLoading(true);
-            const response = await getAllVocabLists();
-            setVocabLists(response.data);
+            const response = await getVocabByListId(listId);
+            setVocabs(response.data);
+            setLoading(false);
         } catch (error) {
             console.error("Error fetching attendance lists:", error);
         } finally {
@@ -49,14 +57,14 @@ export default function VocabListPage() {
                 // Toggle sort order if same column is clicked
                 const newOrder = sortOrder === "ASC" ? "DESC" : "ASC";
                 setSortOrder(newOrder);
-                const response = await sortVocabListsBy(column, newOrder);
-                setVocabLists(response.data);
+                const response = await sortVocabViaListId(listId, column, newOrder);
+                setVocabs(response.data);
             } else {
                 // New column, reset to ASC
                 setSortColumn(column);
                 setSortOrder("ASC");
-                const response = await sortVocabListsBy(column, "ASC");
-                setVocabLists(response.data);
+                const response = await sortVocabViaListId(listId, column, "ASC");
+                setVocabs(response.data);
             }
         } catch (error) {
             console.error("Error sorting registration lists:", error);
@@ -66,43 +74,43 @@ export default function VocabListPage() {
     const handleSearch = async () => {
         try {
             setLoading(true);
-            const response = await searchVocabList(searchQuery);
-            setVocabLists(response.data.filter((vocabList: VocabList) =>
+            const response = await searchVocabViaListId(listId, searchQuery);
+            setVocabs(response.data.filter((vocabList: Vocab) =>
                 Object.values(vocabList).some(value =>
                     value && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
                 )
             ));
         } catch (error) {
-            console.error("Error searching registration lists:", error);
+            console.error("Error searching Vocabs:", error);
         } finally {
             setLoading(false);
         }
     };
 
     const handleEdit = (id: number) => {
-        router.push(`/vocab/list/edit/${id}`);
+        router.push(`/vocab/${id}`);
     };
 
     const confirmDelete = (id: number) => {
-        setVocabListToDelete(id);
+        setVocabToDelete(id);
         setShowDeleteModal(true);
     };
 
     const handleDelete = async () => {
-        if (!vocabListToDelete) return;
+        if (!vocabToDelete) return;
 
         try {
-            await deleteVocabList(vocabListToDelete);
+            await deleteVocab(vocabToDelete);
             setShowDeleteModal(false);
-            setVocabListToDelete(null);
-            await fetchVocabLists();
+            setVocabToDelete(null);
+            await fetchVocabs();
         } catch (error) {
             console.error("Error deleting attendance list:", error);
         }
     };
 
     const handleCreate = () => {
-        router.push("/vocab/create");
+        router.push("/vocab/list/create");
     };
 
     const getSortIcon = (column: string) => {
@@ -115,13 +123,13 @@ export default function VocabListPage() {
             <SideBar />
             <div className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800">Vocab List Management</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">Vocabs Management</h1>
                     <div className="flex items-center space-x-4">
                         {showSearchBar ? (
                             <div className="flex items-center">
                                 <input
                                     type="text"
-                                    placeholder="Search Attendance..."
+                                    placeholder="Search Vocabs..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="border rounded-l px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -173,7 +181,7 @@ export default function VocabListPage() {
                                     d="M12 4v16m8-8H4"
                                 />
                             </svg>
-                            Create Vocab List
+                            Create Vocab
                         </button>
                     </div>
                 </div>
@@ -190,11 +198,15 @@ export default function VocabListPage() {
                                     <tr>
                                         {[
                                             { key: "id", label: "ID" },
-                                            { key: "title", label: "Title" },
-                                            { key: "description", label: "Description" },
-                                            { key: "category", label: "Category" },
-                                            { key: "word_count", label: "Total Vocab in list" },
-                                            { key: "teacher_id", label: "Created Teacher ID" },
+                                            { key: "list_id", label: "Vocab List Id" },
+                                            { key: "word", label: "Word" },
+                                            { key: "translation", label: "Translation" },
+                                            { key: "definition", label: "Definition" },
+                                            { key: "part_of_speech", label: "Type of Word" },
+                                            { key: "example_sentence", label: "Example Sentences" },
+                                            { key: "synonyms", label: "Synonyms" },
+                                            { key: "antonyms", label: "Antonyms" },
+                                            { key: "created_by", label: "Created By" },
                                             { key: "created_at", label: "Created At" },
                                             { key: "actions", label: "Actions" },
                                         ].map((column) => (
@@ -210,25 +222,25 @@ export default function VocabListPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {vocabLists.length === 0 ? (
+                                    {vocabs.length === 0 ? (
                                         <tr>
                                             <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
                                                 No registration entries found
                                             </td>
                                         </tr>
                                     ) : (
-                                        vocabLists.map((vocab) => (
+                                        vocabs.map((vocab) => (
                                             <tr key={vocab.id} className="hover:bg-gray-50">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.id}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    <Link href={`/vocab/list/${vocab.id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
-                                                        {vocab.title}
-                                                    </Link>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.description}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.category}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.word_count}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.teacher_id}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.list_id}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.word}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.translation}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.definition}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.part_of_speech}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.example_sentence}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.synonyms}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.antonyms}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vocab.created_by}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{new Date(vocab.created_at).toLocaleDateString()}</td>
                                                 {/* Actions */}
                                                 <td className="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
