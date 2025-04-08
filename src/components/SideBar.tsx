@@ -99,6 +99,7 @@ const SideBar = () => {
         <NavLink href="/" label="Homepage" active={isActive('/')} />
         <NavLink href="/student" label="Student" active={isActive('/student')} />
         <NavLink href="/student/random" label="Random" active={isActive('/student/random')} />
+        <NavLink href="/board" label="Board" active={isActive('/board')} />
       </div>
 
       {/* Right side - Mobile Navigation & Profile */}

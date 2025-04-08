@@ -37,7 +37,10 @@ export default function EditStudentPage({ params }: PageProps) {
   }, [params]);
 
   useEffect(() => {
-    fetchStudentData();
+    if(studentId !== null){
+      fetchStudentData();
+    }
+
   }, [studentId]);
 
   const fetchStudentData = async () => {

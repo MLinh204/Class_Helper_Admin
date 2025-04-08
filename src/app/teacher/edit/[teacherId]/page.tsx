@@ -7,11 +7,11 @@ import { getTeacherById, updateTeacher } from "@/utils/api";
 import { isAxiosError } from "@/utils/errorUtils";
 
 
-interface EditTeacherPageProps {
+interface PageProps {
   params: Promise<{ teacherId: string }>;
 }
 
-export default function EditTeacherPage({ params }: EditTeacherPageProps) {
+export default function EditTeacherPage({ params }: PageProps) {
   const [teacherId, setTeacherId] = useState<number | null>(null);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -30,7 +30,9 @@ export default function EditTeacherPage({ params }: EditTeacherPageProps) {
   }, [params]);
 
   useEffect(() => {
-    fetchTeacherData();
+    if (teacherId !== null){
+      fetchTeacherData();
+    }
   }, [teacherId]);
 
   const fetchTeacherData = async () => {
