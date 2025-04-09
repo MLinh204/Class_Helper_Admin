@@ -6,7 +6,7 @@ import SideBar from "@/components/SideBar";
 import { getStudentById, updateStudent } from "@/utils/api";
 import { isAxiosError } from "@/utils/errorUtils";
 
-
+//Test change
 interface PageProps {
   params: Promise<{ studentId: string }>;
 }
@@ -32,6 +32,7 @@ export default function EditStudentPage({ params }: PageProps) {
     const resolveParams = async () => {
       const resolvedParams = await params;
       setStudentId(parseInt(resolvedParams.studentId));
+      console.log(studentId);
     };
     resolveParams();
   }, [params]);
