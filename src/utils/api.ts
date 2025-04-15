@@ -9,6 +9,7 @@ const api = axios.create({
   },
 });
 
+// Request interceptor
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -18,6 +19,26 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
+// Response interceptor
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      // Clear auth data
+      localStorage.removeItem('authToken');
+      sessionStorage.removeItem('authToken');
+
+      // Save current path for redirection after login
+      const currentPath = window.location.pathname;
+      sessionStorage.setItem('redirectAfterLogin', currentPath);
+
+      // Redirect to login
+      window.location.href = '/login';
+    }
+
+    return Promise.reject(error);
+  }
+);
 // Authentication endpoints
 export const register = (data: Record<string, unknown>) => api.post('/auth/register', data);
 export const login = (data: Record<string, unknown>) => api.post('/auth/login', data);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { getUserById, updateUser, getRoles, updateUserRole } from "@/utils/api";
@@ -26,20 +26,7 @@ export default function EditUserPage({ params }: EditUserPageProps) {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const resolveParams = async () => {
-      const resolvedParams = await params;
-      setUserId(parseInt(resolvedParams.userId));
-    };
-    resolveParams();
-  }, [params]);
-
-  useEffect(() => {
-    fetchUserData();
-    fetchRoles();
-  }, [userId]);
-
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       setLoading(true);
       if (userId === null) {
@@ -59,16 +46,31 @@ export default function EditUserPage({ params }: EditUserPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId, router]);
 
-  const fetchRoles = async () => {
+  const fetchRoles = useCallback(async () => {
     try {
       const response = await getRoles();
       setRoles(response.data);
     } catch (error) {
       console.error("Error fetching roles:", error);
     }
-  };
+  },[]);
+
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setUserId(parseInt(resolvedParams.userId));
+    };
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    fetchUserData();
+    fetchRoles();
+  }, [userId, fetchUserData, fetchRoles]);
+
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

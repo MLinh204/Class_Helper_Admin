@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { getAttendanceListById, updateAttendanceList } from "@/utils/api";
@@ -21,26 +21,12 @@ export default function EditRegistrationPage({ params }: PageProps) {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const resolveParams = async () => {
-      const resolvedParams = await params;
-      setAttendanceListId(parseInt(resolvedParams.attendanceListId));
-    };
-    resolveParams();
-  }, [params]);
-
-  useEffect(() => {
-    if (attendanceListId !== null) {
-      fetchAttendanceData();
-    }
-  }, [attendanceListId]);
-
-  const fetchAttendanceData = async () => {
+  const fetchAttendanceData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getAttendanceListById(attendanceListId!);
       const attendance = response.data;
-
+  
       setFormData({
         title: attendance.title || "",
         status: attendance.status || "",
@@ -52,7 +38,22 @@ export default function EditRegistrationPage({ params }: PageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [attendanceListId, router]);
+
+    useEffect(() => {
+      const resolveParams = async () => {
+        const resolvedParams = await params;
+        setAttendanceListId(parseInt(resolvedParams.attendanceListId));
+      };
+      resolveParams();
+    }, [params]);
+
+    useEffect(() => {
+      if (attendanceListId !== null) {
+        fetchAttendanceData();
+      }
+    }, [attendanceListId, fetchAttendanceData]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

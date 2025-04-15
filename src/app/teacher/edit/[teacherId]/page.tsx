@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { getTeacherById, updateTeacher } from "@/utils/api";
@@ -20,22 +20,8 @@ export default function EditTeacherPage({ params }: PageProps) {
     scheduleDate: [] as string[],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
-  useEffect(() => {
-    const resolveParams = async () => {
-      const resolvedParams = await params;
-      setTeacherId(parseInt(resolvedParams.teacherId));
-    };
-    resolveParams();
-  }, [params]);
 
-  useEffect(() => {
-    if (teacherId !== null){
-      fetchTeacherData();
-    }
-  }, [teacherId]);
-
-  const fetchTeacherData = async () => {
+  const fetchTeacherData = useCallback(async () => {
     try {
       setLoading(true);
       if (teacherId === null) {
@@ -65,8 +51,24 @@ export default function EditTeacherPage({ params }: PageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [teacherId, router]);
 
+  
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setTeacherId(parseInt(resolvedParams.teacherId));
+    };
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (teacherId !== null){
+      fetchTeacherData();
+    }
+  }, [teacherId, fetchTeacherData]);
+
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
     const checked = type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;

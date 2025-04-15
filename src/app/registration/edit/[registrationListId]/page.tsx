@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { getRegistrationListById, updateRegistrationList } from "@/utils/api";
@@ -21,21 +21,7 @@ export default function EditRegistrationPage({ params }: PageProps) {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const resolveParams = async () => {
-      const resolvedParams = await params;
-      setRegistrationListId(parseInt(resolvedParams.registrationListId));
-    };
-    resolveParams();
-  }, [params]);
-
-  useEffect(() => {
-    if (registrationListId !== null) {
-      fetchRegistrationData();
-    }
-  }, [registrationListId]);
-
-  const fetchRegistrationData = async () => {
+  const fetchRegistrationData =  useCallback(async () => {
     try {
       setLoading(true);
       if (registrationListId === null) {
@@ -54,7 +40,23 @@ export default function EditRegistrationPage({ params }: PageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  },[registrationListId, router]);
+
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setRegistrationListId(parseInt(resolvedParams.registrationListId));
+    };
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (registrationListId !== null) {
+      fetchRegistrationData();
+    }
+  }, [registrationListId, fetchRegistrationData]);
+
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

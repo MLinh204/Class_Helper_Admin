@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { getVocabListById, updateVocabList } from "@/utils/api";
@@ -22,21 +22,7 @@ export default function EditVocabListPage({ params }: PageProps) {
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
 
-    useEffect(() => {
-        const resolveParams = async () => {
-            const resolvedParams = await params;
-            setlistId(parseInt(resolvedParams.listId));
-        };
-        resolveParams();
-    }, [params]);
-
-    useEffect(() => {
-        if (listId !== null) {
-            fetchVocabListData();
-        }
-    }, [listId]);
-
-    const fetchVocabListData = async () => {
+    const fetchVocabListData = useCallback(async () => {
         try {
             setLoading(true);
             const response = await getVocabListById(listId!);
@@ -54,7 +40,22 @@ export default function EditVocabListPage({ params }: PageProps) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [ listId, router]);
+
+    useEffect(() => {
+        const resolveParams = async () => {
+            const resolvedParams = await params;
+            setlistId(parseInt(resolvedParams.listId));
+        };
+        resolveParams();
+    }, [params]);
+
+    useEffect(() => {
+        if (listId !== null) {
+            fetchVocabListData();
+        }
+    }, [listId, fetchVocabListData]);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;

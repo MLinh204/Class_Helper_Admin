@@ -134,7 +134,7 @@ export default function VocabDetailPage({ params }: { params: Promise<{ vocabId:
       <div className="min-h-screen flex items-center justify-center">
         <div className="bg-yellow-50 p-6 rounded-lg shadow-md">
           <h2 className="text-yellow-600 text-xl font-semibold">Vocabulary not found</h2>
-          <p className="mt-2">The vocabulary item you're looking for could not be found.</p>
+          <p className="mt-2">{"The vocabulary item you're looking for could not be found."}.</p>
           <Link href="/vocab" className="mt-4 inline-block text-blue-600 hover:underline">
             Go back to vocabulary list
           </Link>

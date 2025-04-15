@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import SideBar from "@/components/SideBar";
 import { getStudentById, updateStudent } from "@/utils/api";
@@ -28,22 +28,7 @@ export default function EditStudentPage({ params }: PageProps) {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const resolveParams = async () => {
-      const resolvedParams = await params;
-      setStudentId(parseInt(resolvedParams.studentId));
-    };
-    resolveParams();
-  }, [params]);
-
-  useEffect(() => {
-    if(studentId !== null){
-      fetchStudentData();
-    }
-
-  }, [studentId]);
-
-  const fetchStudentData = async () => {
+  const fetchStudentData = useCallback(async () => {
     try {
       setLoading(true);
       if (studentId === null) {
@@ -69,7 +54,24 @@ export default function EditStudentPage({ params }: PageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [ studentId, router]);
+
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setStudentId(parseInt(resolvedParams.studentId));
+    };
+    resolveParams();
+  }, [params]);
+
+  useEffect(() => {
+    if(studentId !== null){
+      fetchStudentData();
+    }
+
+  }, [studentId, fetchStudentData]);
+
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
