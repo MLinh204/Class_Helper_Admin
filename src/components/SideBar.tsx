@@ -12,7 +12,7 @@ interface MenuItemProps {
   active?: boolean;
 }
 
-const MenuItem = ({ href, label, onClick}: MenuItemProps) => (
+const MenuItem = ({ href, label, onClick }: MenuItemProps) => (
   <li className="py-3 px-4 hover:bg-blue-100 w-full transition duration-200">
     <Link
       href={href}
@@ -24,11 +24,21 @@ const MenuItem = ({ href, label, onClick}: MenuItemProps) => (
   </li>
 );
 
-const NavLink = ({ href, label, active }: { href: string; label: string; active?: boolean }) => (
+const NavLink = ({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active?: boolean;
+}) => (
   <Link
     href={href}
     className={`mx-3 py-2 text-md font-medium ${
-      active ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-700 hover:text-blue-600"
+      active
+        ? "text-blue-600 border-b-2 border-blue-600"
+        : "text-gray-700 hover:text-blue-600"
     }`}
   >
     {label}
@@ -89,6 +99,7 @@ const SideBar = () => {
               <MenuItem href="/attendance" label="Attendance Management" />
               <MenuItem href="/vocab" label="Vocab Management" />
               <MenuItem href="/registration" label="Registration List" />
+              <MenuItem href="/salary" label="Salary Management" />
             </ul>
           </div>
         )}
@@ -96,19 +107,25 @@ const SideBar = () => {
 
       {/* Middle - Navigation Links */}
       <div className="hidden md:flex items-center">
-        <NavLink href="/" label="Homepage" active={isActive('/')} />
-        <NavLink href="/student" label="Student" active={isActive('/student')} />
-        <NavLink href="/student/random" label="Random" active={isActive('/student/random')} />
-        <NavLink href="/board" label="Board" active={isActive('/board')} />
+        <NavLink href="/" label="Homepage" active={isActive("/")} />
+        <NavLink
+          href="/student"
+          label="Student"
+          active={isActive("/student")}
+        />
+        <NavLink
+          href="/student/random"
+          label="Random"
+          active={isActive("/student/random")}
+        />
+        <NavLink href="/board" label="Board" active={isActive("/board")} />
       </div>
 
       {/* Right side - Mobile Navigation & Profile */}
       <div className="flex items-center">
         {/* Mobile Navigation Dropdown */}
         <div className="relative md:hidden mr-4">
-          <button
-            className="p-2 rounded-full hover:bg-gray-300 transition duration-200 focus:outline-none"
-          >
+          <button className="p-2 rounded-full hover:bg-gray-300 transition duration-200 focus:outline-none">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
